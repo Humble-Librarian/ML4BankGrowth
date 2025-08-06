@@ -8,7 +8,7 @@ with open('model.pkl', 'rb') as f:
     model = joblib.load(f)
 
 # Define the features used in the model
-selected_features = ['region_Andaman & Nicobar', 'region_Andhra Pradesh', 'region_Arunachal Pradesh', 'region_Assam', 'region_Bihar', 'region_Chandigarh', 'region_Chhattisgarh', 'region_Dadra & Nagar Haveli', 'region_Delhi', 'region_Goa', 'region_Gujarat', 'region_Haryana', 'region_Himachal Pradesh', 'region_Jammu & Kashmir', 'region_Jharkhand', 'region_Karnataka', 'region_Kerala', 'region_Ladakh', 'region_Lakshadweep', 'region_Madhya Pradesh', 'region_Maharashtra', 'region_Manipur', 'region_Meghalaya', 'region_Mizoram', 'region_Nagaland', 'region_Odisha', 'region_Puducherry', 'region_Punjab', 'region_Rajasthan', 'region_Sikkim', 'region_Tamil Nadu', 'region_Telangana', 'region_Tripura', 'region_Uttar Pradesh', 'region_Uttarakhand', 'region_West Bengal', 'bank_Axis', 'lending_rate']
+selected_features = ['region_Andaman & Nicobar', 'region_Andhra Pradesh', 'region_Arunachal Pradesh', 'region_Assam', 'region_Bihar', 'region_Chandigarh', 'region_Chhattisgarh', 'region_Dadra & Nagar Haveli', 'region_Delhi', 'region_Goa', 'region_Gujarat', 'region_Haryana', 'region_Himachal Pradesh', 'region_Jammu & Kashmir', 'region_Jharkhand', 'region_Karnataka', 'region_Kerala', 'region_Ladakh', 'region_Lakshadweep', 'region_Madhya Pradesh', 'region_Maharashtra', 'region_Manipur', 'region_Meghalaya', 'region_Mizoram', 'region_Nagaland', 'region_Odisha', 'region_Puducherry', 'region_Punjab', 'region_Rajasthan', 'region_Sikkim', 'region_Tamil Nadu', 'region_Telangana', 'region_Tripura', 'region_Uttar Pradesh', 'region_Uttarakhand', 'region_West Bengal']
 
 # Streamlit App UI
 st.title("📈 Lending Rate Predictions on Bank growth rate")
