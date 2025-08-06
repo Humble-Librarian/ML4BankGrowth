@@ -19,7 +19,7 @@ selected_features = [
     'region_Odisha', 'region_Puducherry', 'region_Punjab', 'region_Rajasthan',
     'region_Sikkim', 'region_Tamil Nadu', 'region_Telangana', 'region_Tripura',
     'region_Uttar Pradesh', 'region_Uttarakhand', 'region_West Bengal',
-    'bank_Axis', 'lending_rate'
+    'bank_Axis', 'repo_rate'
 ]
 
 # Streamlit UI
