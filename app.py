@@ -8,7 +8,7 @@ with open('model.pkl', 'rb') as f:
     model = joblib.load(f)
 
 # ✅ These are the only features your model was trained on
-selected_features = ['year', 'month', 'credit_growth_rate', 'repo_rate', 'crr', 'deposit_growth_rate', 'gdp_growth', 'inflation_rate', 'consumer_confidence_index', 'investment_sentiment', 'npa_ratio', 'liquidity_ratio', 'global_trade_index', 'bank_size', 'monthly_quarter']
+selected_features = ['bank_type_Private', 'year', 'month', 'credit_growth_rate', 'repo_rate', 'crr', 'deposit_growth_rate', 'gdp_growth', 'inflation_rate', 'consumer_confidence_index', 'investment_sentiment', 'npa_ratio', 'liquidity_ratio', 'global_trade_index', 'bank_size']
 
 # Streamlit UI
 st.title("📈 Lending Rate Prediction based on Bank Growth Rate")
