@@ -24,10 +24,25 @@ MODEL_PATH = 'model.pkl' # IMPORTANT: Replace with the actual path to your model
 # --- 2. DEFINE FEATURE ORDER ---
 # This list MUST be in the exact same order as the features your model was trained on.
 FEATURE_ORDER = [
-    'bank_type_Private', 'year', 'month', 'credit_growth_rate', 'repo_rate', 'crr',
-    'deposit_growth_rate', 'gdp_growth', 'inflation_rate', 'consumer_confidence_index',
-    'investment_sentiment', 'npa_ratio', 'liquidity_ratio', 'global_trade_index', 'bank_size'
+    'region_Andaman & Nicobar', 'region_Assam', 'region_Bihar', 'region_Chandigarh',
+    'region_Dadra & Nagar Haveli', 'region_Goa', 'region_Gujarat', 'region_Haryana',
+    'region_Himachal Pradesh', 'region_Jammu & Kashmir', 'region_Karnataka',
+    'region_Kerala', 'region_Ladakh', 'region_Madhya Pradesh', 'region_Meghalaya',
+    'region_Mizoram', 'region_Rajasthan', 'region_Sikkim', 'region_Tamil Nadu',
+    'region_Tripura', 'region_Uttarakhand', 'bank_IndusInd', 'bank_UCO Bank',
+    'loan_type_Agriculture', 'repo_rate'
 ]
+
+# --- 3. DEFINE USER-FRIENDLY OPTIONS FOR DROPDOWNS ---
+# These are extracted from your feature list to populate the select boxes.
+REGION_OPTIONS = [
+    'Andaman & Nicobar', 'Assam', 'Bihar', 'Chandigarh', 'Dadra & Nagar Haveli',
+    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jammu & Kashmir',
+    'Karnataka', 'Kerala', 'Ladakh', 'Madhya Pradesh', 'Meghalaya', 'Mizoram',
+    'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Tripura', 'Uttarakhand'
+]
+BANK_OPTIONS = ['IndusInd', 'UCO Bank']
+LOAN_TYPE_OPTIONS = ['Agriculture'] # Add more if your model supports them
 
 # -----------------------------------------------------------------------------
 # Load Model
@@ -38,7 +53,6 @@ def load_model(model_path):
     """Loads the pickled machine learning model with error handling."""
     try:
         with open(model_path, 'rb') as f:
-            # Use joblib.load if you saved with joblib, otherwise use pickle.load
             model = joblib.load(f)
         return model
     except FileNotFoundError:
@@ -55,44 +69,47 @@ model = load_model(MODEL_PATH)
 # Sidebar - User Inputs
 # -----------------------------------------------------------------------------
 st.sidebar.title("Prediction Inputs")
-st.sidebar.markdown("Adjust the values below to see the real-time prediction.")
-
-# Create a dictionary to hold user inputs
-input_data = {}
+st.sidebar.markdown("Select the parameters to see the real-time prediction.")
 
 # --- Input Groups ---
-st.sidebar.header("Bank Details")
-bank_type_selection = st.sidebar.selectbox("Bank Type", ["Private", "Public"])
-input_data['bank_type_Private'] = 1 if bank_type_selection == "Private" else 0
-input_data['npa_ratio'] = st.sidebar.slider("NPA Ratio (%)", 0.0, 15.0, 2.5, 0.1, help="Non-Performing Asset Ratio")
-input_data['liquidity_ratio'] = st.sidebar.slider("Liquidity Ratio (%)", 10.0, 50.0, 20.0, 0.5)
-input_data['bank_size'] = st.sidebar.slider("Bank Size (in Billion USD)", 10.0, 500.0, 100.0, 10.0)
+st.sidebar.header("Loan & Bank Details")
+selected_region = st.sidebar.selectbox("Region", REGION_OPTIONS)
+selected_bank = st.sidebar.selectbox("Bank", BANK_OPTIONS)
+selected_loan_type = st.sidebar.selectbox("Loan Type", LOAN_TYPE_OPTIONS)
 
 st.sidebar.header("Economic Factors")
-input_data['repo_rate'] = st.sidebar.slider("Repo Rate (%)", 3.0, 9.0, 6.5, 0.25)
-input_data['crr'] = st.sidebar.slider("Cash Reserve Ratio (CRR %)", 3.0, 6.0, 4.5, 0.1)
-input_data['credit_growth_rate'] = st.sidebar.slider("Credit Growth Rate (%)", -5.0, 20.0, 10.0, 0.5)
-input_data['deposit_growth_rate'] = st.sidebar.slider("Deposit Growth Rate (%)", -5.0, 20.0, 12.0, 0.5)
-input_data['gdp_growth'] = st.sidebar.slider("GDP Growth (%)", -10.0, 10.0, 7.0, 0.1)
-input_data['inflation_rate'] = st.sidebar.slider("Inflation Rate (%)", 1.0, 10.0, 5.0, 0.1)
-input_data['consumer_confidence_index'] = st.sidebar.slider("Consumer Confidence Index", 80.0, 120.0, 100.0, 0.5)
-input_data['investment_sentiment'] = st.sidebar.slider("Investment Sentiment Index", 80.0, 120.0, 105.0, 0.5)
-input_data['global_trade_index'] = st.sidebar.slider("Global Trade Index", 80.0, 120.0, 102.0, 0.5)
+repo_rate_input = st.sidebar.slider("Repo Rate (%)", 3.0, 9.0, 6.5, 0.25)
 
-st.sidebar.header("Time Period")
-input_data['year'] = st.sidebar.number_input("Year", min_value=2020, max_value=2030, value=2024)
-input_data['month'] = st.sidebar.slider("Month", 1, 12, 6)
 
 # -----------------------------------------------------------------------------
 # Main Panel - Title, Prediction, and Visualizations
 # -----------------------------------------------------------------------------
-st.title("🏦 Advanced Lending Rate Predictor")
-st.markdown("This dashboard predicts the lending rate using a machine learning model based on 15 key financial and economic indicators.")
+st.title("🏦 Multi-Feature Lending Rate Predictor")
+st.markdown("This dashboard uses a detailed model including region, bank, and loan type.")
 
 if model:
+    # --- Create the feature dictionary for the model ---
+    input_features = {feature: 0 for feature in FEATURE_ORDER}
+
+    # Set the continuous feature
+    input_features['repo_rate'] = repo_rate_input
+
+    # Set the one-hot encoded features based on user selection
+    region_feature = f"region_{selected_region}"
+    if region_feature in input_features:
+        input_features[region_feature] = 1
+
+    bank_feature = f"bank_{selected_bank}"
+    if bank_feature in input_features:
+        input_features[bank_feature] = 1
+
+    loan_type_feature = f"loan_type_{selected_loan_type}"
+    if loan_type_feature in input_features:
+        input_features[loan_type_feature] = 1
+
     # --- Prediction ---
     # Convert input dictionary to a DataFrame in the correct feature order
-    input_df = pd.DataFrame([input_data])[FEATURE_ORDER]
+    input_df = pd.DataFrame([input_features])[FEATURE_ORDER]
 
     try:
         prediction = model.predict(input_df)[0]
@@ -129,7 +146,7 @@ if model:
 
         # --- Model Transparency ---
         st.markdown("---")
-        with st.expander("🔍 Click to see the feature values used for this prediction"):
+        with st.expander("🔍 Click to see the feature vector used for this prediction"):
             st.dataframe(input_df)
 
     except Exception as e:
