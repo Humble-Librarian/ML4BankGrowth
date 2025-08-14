@@ -24,25 +24,30 @@ MODEL_PATH = 'model.pkl' # IMPORTANT: Replace with the actual path to your model
 # --- 2. DEFINE FEATURE ORDER ---
 # This list MUST be in the exact same order as the features your model was trained on.
 FEATURE_ORDER = [
-    'region_Andaman & Nicobar', 'region_Assam', 'region_Bihar', 'region_Chandigarh',
-    'region_Dadra & Nagar Haveli', 'region_Goa', 'region_Gujarat', 'region_Haryana',
-    'region_Himachal Pradesh', 'region_Jammu & Kashmir', 'region_Karnataka',
-    'region_Kerala', 'region_Ladakh', 'region_Madhya Pradesh', 'region_Meghalaya',
-    'region_Mizoram', 'region_Rajasthan', 'region_Sikkim', 'region_Tamil Nadu',
-    'region_Tripura', 'region_Uttarakhand', 'bank_IndusInd', 'bank_UCO Bank',
-    'loan_type_Agriculture', 'repo_rate'
+    'region_Andaman & Nicobar', 'region_Arunachal Pradesh', 'region_Assam', 'region_Bihar',
+    'region_Chandigarh', 'region_Chhattisgarh', 'region_Dadra & Nagar Haveli', 'region_Delhi',
+    'region_Goa', 'region_Gujarat', 'region_Haryana', 'region_Himachal Pradesh',
+    'region_Jammu & Kashmir', 'region_Karnataka', 'region_Kerala', 'region_Ladakh',
+    'region_Madhya Pradesh', 'region_Maharashtra', 'region_Meghalaya', 'region_Mizoram',
+    'region_Punjab', 'region_Rajasthan', 'region_Sikkim', 'region_Tamil Nadu',
+    'region_Tripura', 'region_Uttarakhand', 'region_West Bengal', 'bank_Canara',
+    'bank_IndusInd', 'bank_Kotak', 'bank_UCO Bank', 'bank_Yes Bank', 'bank_type_Public',
+    'loan_type_Agriculture', 'loan_type_MSME', 'season_Winter', 'month', 'repo_rate',
+    'gdp_growth', 'monthly_quarter'
 ]
 
 # --- 3. DEFINE USER-FRIENDLY OPTIONS FOR DROPDOWNS ---
-# These are extracted from your feature list to populate the select boxes.
 REGION_OPTIONS = [
-    'Andaman & Nicobar', 'Assam', 'Bihar', 'Chandigarh', 'Dadra & Nagar Haveli',
-    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jammu & Kashmir',
-    'Karnataka', 'Kerala', 'Ladakh', 'Madhya Pradesh', 'Meghalaya', 'Mizoram',
-    'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Tripura', 'Uttarakhand'
+    'Andaman & Nicobar', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chandigarh',
+    'Chhattisgarh', 'Dadra & Nagar Haveli', 'Delhi', 'Goa', 'Gujarat', 'Haryana',
+    'Himachal Pradesh', 'Jammu & Kashmir', 'Karnataka', 'Kerala', 'Ladakh',
+    'Madhya Pradesh', 'Maharashtra', 'Meghalaya', 'Mizoram', 'Punjab', 'Rajasthan',
+    'Sikkim', 'Tamil Nadu', 'Tripura', 'Uttarakhand', 'West Bengal'
 ]
-BANK_OPTIONS = ['IndusInd', 'UCO Bank']
-LOAN_TYPE_OPTIONS = ['Agriculture'] # Add more if your model supports them
+BANK_OPTIONS = ['Canara', 'IndusInd', 'Kotak', 'UCO Bank', 'Yes Bank']
+BANK_TYPE_OPTIONS = ['Public', 'Private']
+LOAN_TYPE_OPTIONS = ['Agriculture', 'MSME']
+SEASON_OPTIONS = ['Winter', 'Summer', 'Monsoon', 'Autumn'] # Assuming other seasons might be relevant
 
 # -----------------------------------------------------------------------------
 # Load Model
@@ -69,43 +74,55 @@ model = load_model(MODEL_PATH)
 # Sidebar - User Inputs
 # -----------------------------------------------------------------------------
 st.sidebar.title("Prediction Inputs")
-st.sidebar.markdown("Select the parameters to see the real-time prediction.")
+st.sidebar.markdown("Adjust the values to see the real-time prediction.")
 
 # --- Input Groups ---
 st.sidebar.header("Loan & Bank Details")
 selected_region = st.sidebar.selectbox("Region", REGION_OPTIONS)
 selected_bank = st.sidebar.selectbox("Bank", BANK_OPTIONS)
+selected_bank_type = st.sidebar.selectbox("Bank Type", BANK_TYPE_OPTIONS)
 selected_loan_type = st.sidebar.selectbox("Loan Type", LOAN_TYPE_OPTIONS)
+
+st.sidebar.header("Time & Season")
+selected_season = st.sidebar.selectbox("Season", SEASON_OPTIONS)
+month_input = st.sidebar.slider("Month", 1, 12, 6)
+monthly_quarter_input = st.sidebar.slider("Quarter", 1, 4, 2)
 
 st.sidebar.header("Economic Factors")
 repo_rate_input = st.sidebar.slider("Repo Rate (%)", 3.0, 9.0, 6.5, 0.25)
+gdp_growth_input = st.sidebar.slider("GDP Growth (%)", -10.0, 10.0, 7.0, 0.1)
 
 
 # -----------------------------------------------------------------------------
 # Main Panel - Title, Prediction, and Visualizations
 # -----------------------------------------------------------------------------
-st.title("🏦 Multi-Feature Lending Rate Predictor")
-st.markdown("This dashboard uses a detailed model including region, bank, and loan type.")
+st.title("🏦 Comprehensive Lending Rate Predictor")
+st.markdown("This dashboard uses a detailed model with 40 features for a nuanced prediction.")
 
 if model:
     # --- Create the feature dictionary for the model ---
     input_features = {feature: 0 for feature in FEATURE_ORDER}
 
-    # Set the continuous feature
+    # Set numerical features
     input_features['repo_rate'] = repo_rate_input
+    input_features['gdp_growth'] = gdp_growth_input
+    input_features['month'] = month_input
+    input_features['monthly_quarter'] = monthly_quarter_input
 
-    # Set the one-hot encoded features based on user selection
-    region_feature = f"region_{selected_region}"
-    if region_feature in input_features:
-        input_features[region_feature] = 1
+    # Set one-hot encoded features based on user selection
+    def set_one_hot(prefix, selection, features_dict):
+        feature_name = f"{prefix}_{selection}"
+        if feature_name in features_dict:
+            features_dict[feature_name] = 1
 
-    bank_feature = f"bank_{selected_bank}"
-    if bank_feature in input_features:
-        input_features[bank_feature] = 1
+    set_one_hot('region', selected_region, input_features)
+    set_one_hot('bank', selected_bank, input_features)
+    set_one_hot('loan_type', selected_loan_type, input_features)
+    set_one_hot('season', selected_season, input_features)
 
-    loan_type_feature = f"loan_type_{selected_loan_type}"
-    if loan_type_feature in input_features:
-        input_features[loan_type_feature] = 1
+    # Handle bank_type separately as it's 'Public' vs 'Private'
+    if selected_bank_type == 'Public' and 'bank_type_Public' in input_features:
+        input_features['bank_type_Public'] = 1
 
     # --- Prediction ---
     # Convert input dictionary to a DataFrame in the correct feature order
