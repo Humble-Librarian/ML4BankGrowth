@@ -1,4 +1,3 @@
-# ML4BankGrowth
 # 📈 ML4BankGrowth
 
 **ML4BankGrowth** is a proprietary machine learning project created to **predict lending rates** for banks using historical, regional, and economic data.  
