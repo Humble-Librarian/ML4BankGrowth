@@ -18,7 +18,7 @@ This project:
 1. Loads and prepares a proprietary banking dataset
 2. Analyzes the data to uncover relationships between factors and lending rates
 3. Uses **Recursive Feature Elimination (RFE)** to select important inputs
-4. Trains a **Random Forest Regression** model to predict lending rates
+4. Trains a **Ridge** model to predict lending rates
 5. Saves trained model artifacts for reuse
 6. Deploys an interactive **Streamlit web app** for viewing predictions
 
