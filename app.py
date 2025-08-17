@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
+import plotly.express as px
 import joblib
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # Page Configuration
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------
 st.set_page_config(
     page_title="Lending Rate Predictor",
     page_icon="💸",
@@ -14,13 +14,11 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # Model & Feature Configuration
-# -----------------------------------------------------------------------------
-
+# ---------------------------------------------------------------------
 MODEL_PATH = 'model.pkl'
 
-# This is the verified feature list.
 FEATURE_ORDER = [
     'region_Andaman & Nicobar', 'region_Arunachal Pradesh', 'region_Assam', 'region_Bihar',
     'region_Chandigarh', 'region_Chhattisgarh', 'region_Dadra & Nagar Haveli', 'region_Delhi',
@@ -34,7 +32,6 @@ FEATURE_ORDER = [
     'gdp_growth', 'monthly_quarter'
 ]
 
-# User-friendly options for the dropdowns in the sidebar
 REGION_OPTIONS = [
     'Andaman & Nicobar', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chandigarh',
     'Chhattisgarh', 'Dadra & Nagar Haveli', 'Delhi', 'Goa', 'Gujarat', 'Haryana',
@@ -47,115 +44,124 @@ BANK_TYPE_OPTIONS = ['Public', 'Private']
 LOAN_TYPE_OPTIONS = ['Agriculture', 'MSME']
 SEASON_OPTIONS = ['Winter', 'Summer', 'Monsoon', 'Autumn']
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------
 # Load Model
-# -----------------------------------------------------------------------------
-
+# ---------------------------------------------------------------------
 @st.cache_resource
 def load_model(model_path):
-    """Loads the pickled machine learning model with error handling."""
     try:
         with open(model_path, 'rb') as f:
-            model = joblib.load(f)
-        return model
-    except FileNotFoundError:
-        st.error(f"Model file not found at '{model_path}'. Please ensure the file is in the same folder as the app and the name is correct.")
-        return None
+            return joblib.load(f)
     except Exception as e:
-        st.error(f"An error occurred while loading the model: {e}")
+        st.error(f"⚠️ Could not load model: {e}")
         return None
 
 model = load_model(MODEL_PATH)
 
-# -----------------------------------------------------------------------------
-# Sidebar - User Inputs
-# -----------------------------------------------------------------------------
-st.sidebar.title("Prediction Inputs")
-st.sidebar.markdown("Adjust the values to see the real-time prediction.")
+# ---------------------------------------------------------------------
+# Sidebar Inputs
+# ---------------------------------------------------------------------
+st.sidebar.title("⚙️ Prediction Inputs")
+st.sidebar.caption("Adjust values to see real-time lending rate prediction")
 
-st.sidebar.header("Loan & Bank Details")
-selected_region = st.sidebar.selectbox("Region", REGION_OPTIONS)
-selected_bank = st.sidebar.selectbox("Bank", BANK_OPTIONS)
-selected_bank_type = st.sidebar.selectbox("Bank Type", BANK_TYPE_OPTIONS)
-selected_loan_type = st.sidebar.selectbox("Loan Type", LOAN_TYPE_OPTIONS)
+with st.sidebar.expander("🏦 Loan & Bank Details", expanded=True):
+    selected_region = st.selectbox("Region", REGION_OPTIONS)
+    selected_bank = st.selectbox("Bank", BANK_OPTIONS)
+    selected_bank_type = st.radio("Bank Type", BANK_TYPE_OPTIONS, horizontal=True)
+    selected_loan_type = st.radio("Loan Type", LOAN_TYPE_OPTIONS, horizontal=True)
 
-st.sidebar.header("Time & Season")
-selected_season = st.sidebar.selectbox("Season", SEASON_OPTIONS)
-month_input = st.sidebar.slider("Month", 1, 12, 6)
-monthly_quarter_input = st.sidebar.slider("Quarter", 1, 4, 2)
+with st.sidebar.expander("📅 Time & Season", expanded=False):
+    selected_season = st.selectbox("Season", SEASON_OPTIONS)
+    month_input = st.slider("Month", 1, 12, 6)
+    monthly_quarter_input = st.slider("Quarter", 1, 4, 2)
 
-st.sidebar.header("Economic Factors")
-repo_rate_input = st.sidebar.slider("Repo Rate (%)", 3.0, 9.0, 6.5, 0.25)
-gdp_growth_input = st.sidebar.slider("GDP Growth (%)", -10.0, 10.0, 7.0, 0.1)
+with st.sidebar.expander("📊 Economic Factors", expanded=False):
+    repo_rate_input = st.slider("Repo Rate (%)", 3.0, 9.0, 6.5, 0.25)
+    gdp_growth_input = st.slider("GDP Growth (%)", -10.0, 10.0, 7.0, 0.1)
 
-# -----------------------------------------------------------------------------
-# Main Panel
-# -----------------------------------------------------------------------------
-st.title("🏦 Comprehensive Lending Rate Predictor")
-st.markdown("This dashboard uses a detailed model with 40 features for a nuanced prediction.")
+# Reset button
+if st.sidebar.button("🔄 Reset Inputs"):
+    st.experimental_rerun()
+
+# ---------------------------------------------------------------------
+# Main Layout
+# ---------------------------------------------------------------------
+st.title("💸 Lending Rate Predictor")
+st.markdown(
+    "This app predicts the **lending rate of banks** using a machine learning model trained on multiple economic and financial factors."
+)
 
 if model:
-    # --- Create the feature dictionary for the model ---
+    # Prepare feature dict
     input_features = {feature: 0 for feature in FEATURE_ORDER}
+    input_features.update({
+        'repo_rate': repo_rate_input,
+        'gdp_growth': gdp_growth_input,
+        'month': month_input,
+        'monthly_quarter': monthly_quarter_input
+    })
 
-    # Set numerical features from user input
-    input_features['repo_rate'] = repo_rate_input
-    input_features['gdp_growth'] = gdp_growth_input
-    input_features['month'] = month_input
-    input_features['monthly_quarter'] = monthly_quarter_input
-
-    # Helper function to handle one-hot encoding
     def set_one_hot(prefix, selection, features_dict):
-        feature_name = f"{prefix}_{selection}"
-        if feature_name in features_dict:
-            features_dict[feature_name] = 1
+        name = f"{prefix}_{selection}"
+        if name in features_dict:
+            features_dict[name] = 1
 
-    # Set one-hot encoded features based on user selection
     set_one_hot('region', selected_region, input_features)
     set_one_hot('bank', selected_bank, input_features)
     set_one_hot('loan_type', selected_loan_type, input_features)
     set_one_hot('season', selected_season, input_features)
-    
     if selected_bank_type == 'Public':
         input_features['bank_type_Public'] = 1
 
-    # --- Prediction ---
-    # Convert the dictionary to a DataFrame with columns in the correct order
     input_df = pd.DataFrame([input_features])[FEATURE_ORDER]
 
-    # --- NEW: Explicitly set data types to match training environment ---
-    # This is a robust way to prevent dtype-related errors.
-    dtype_mapping = {col: 'float64' for col in input_df.columns}
-    # One-hot encoded columns are integers (0 or 1)
-    for col in input_df.columns:
-        if 'region_' in col or 'bank_' in col or 'loan_type_' in col or 'season_' in col or 'bank_type_' in col:
-            dtype_mapping[col] = 'int64'
-    # Specific integer columns
-    dtype_mapping['month'] = 'int64'
-    dtype_mapping['monthly_quarter'] = 'int64'
-    
-    try:
-        input_df = input_df.astype(dtype_mapping)
-    except Exception as e:
-        st.warning(f"Could not apply data types. This might be okay. Error: {e}")
-
-
+    # Prediction
     try:
         prediction = model.predict(input_df)[0]
-        
-        # --- Display Results ---
-        st.markdown("---")
-        st.header("Prediction Result")
-        st.metric(label="Predicted Lending Rate", value=f"{prediction:.2f}%")
 
-        # --- Model Transparency ---
-        with st.expander("🔍 Click to see the final feature vector sent to the model"):
+        st.markdown("---")
+        st.subheader("📈 Prediction Result")
+
+        # Color coding logic
+        if prediction < 6:
+            st.success(f"✅ Predicted Lending Rate: {prediction:.2f}% (Low)")
+        elif 6 <= prediction <= 9:
+            st.warning(f"⚠️ Predicted Lending Rate: {prediction:.2f}% (Moderate)")
+        else:
+            st.error(f"🚨 Predicted Lending Rate: {prediction:.2f}% (High)")
+
+        # Feature importance (if available)
+        if hasattr(model, "coef_"):
+            st.markdown("### 🔑 Feature Importance (Top 8)")
+            coef_df = pd.DataFrame({
+                "Feature": FEATURE_ORDER,
+                "Coefficient": model.coef_.flatten()
+            }).sort_values("Coefficient", key=abs, ascending=False).head(8)
+
+            fig = px.bar(coef_df, x="Coefficient", y="Feature", orientation="h",
+                         title="Top Feature Influences on Lending Rate")
+            st.plotly_chart(fig, use_container_width=True)
+
+        with st.expander("📂 Model Input Data"):
             st.dataframe(input_df)
-            st.write("Data Types:")
-            st.write(input_df.dtypes.to_dict())
 
     except Exception as e:
-        st.error(f"An error occurred during prediction: {e}")
+        st.error(f"Prediction failed: {e}")
 
 else:
-    st.warning("Model is not loaded. Please check the `MODEL_PATH` and ensure the file is present.")
+    st.warning("Model is not loaded. Please check the model path.")
+
+# ---------------------------------------------------------------------
+# About Section
+# ---------------------------------------------------------------------
+st.markdown("---")
+st.subheader("ℹ️ About this Project")
+st.markdown("""
+- **Goal**: Predict lending rates for banks using regional, seasonal, and macroeconomic indicators.  
+- **Model Used**: Ridge Regression (R² ≈ 0.8).  
+- **Features**: 40 input features covering geography, loan types, repo rate, GDP growth, etc.  
+- **Deployment**: Built with Streamlit for interactive exploration.  
+
+👉 This app is designed as a **portfolio project** to showcase end-to-end ML development: 
+data preprocessing, model training, evaluation, and deployment.
+""")
