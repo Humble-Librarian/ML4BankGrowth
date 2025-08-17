@@ -20,9 +20,8 @@ It provides a clean and interactive **Streamlit web app** for making predictions
 ### Main Interface  
 - Sidebar inputs for all available features  
 - Green success box showing prediction result  
-- Bar chart of **Top 5 feature importances**  
+- Bar chart of **Top 8 feature importances**  
 
-*(You can add screenshots here after running the app, e.g., from Streamlit Community Cloud.)*
 
 ---
 
@@ -36,18 +35,16 @@ cd ML4BankGrowth
 ```
 ### Create a virtual environment & install dependencies
 ```bash
+
 pip install -r requirements.txt
 
 ```
 ### Run the Streamlit app locally
 ```bash
+
 streamlit run app.py
 
 ```
-## 📂 Repository Structure
-ML4BankGrowth/
-│── app.py # Streamlit web app
-│── model.pkl # Trained Ridge Regression model
-│── rfe_selector.pkl # Feature selector (RFE)
-│── requirements.txt # Python dependencies
-│── README.md # Project documentation
+## 📜 License  
+
+© 2025 Humble-Librarian. All rights reserved.  
