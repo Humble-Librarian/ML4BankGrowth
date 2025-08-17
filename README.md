@@ -1,59 +1,53 @@
-# 📈 ML4BankGrowth
+# 📊 ML4BankGrowth — Lending Rate Prediction  
 
-**ML4BankGrowth** is a proprietary machine learning project created to **predict lending rates** for banks using historical, regional, and economic data.  
-It demonstrates the complete workflow of a real-world ML project — from data analysis and feature selection to model training, evaluation, and deployment.
+This project applies **Machine Learning** (Ridge Regression with Recursive Feature Elimination) to predict **bank lending rates** based on regional and economic indicators.  
 
-⚠️ **IMPORTANT — RESTRICTED USE**  
-This repository, its datasets, trained models, and code are the **exclusive intellectual property** of the creator. **No usage, reproduction, distribution, modification, or deployment** is permitted without **explicit written consent** from the author.  
-Any unauthorized use will be treated as a violation of intellectual property laws.
-
-✅ **Live Demo (Read-Only):** [ML4BankGrowth Streamlit App](https://ml4bankgrowth-5tsd4vzenky6bdpjcberfx.streamlit.app/)
+It provides a clean and interactive **Streamlit web app** for making predictions and visualizing the most important features influencing the model.  
 
 ---
 
-## 🚀 What This Repository Does
-
-This project:
-1. Loads and prepares a proprietary banking dataset
-2. Analyzes the data to uncover relationships between factors and lending rates
-3. Uses **Recursive Feature Elimination (RFE)** to select important inputs
-4. Trains a **Ridge** model to predict lending rates
-5. Saves trained model artifacts for reuse
-6. Deploys an interactive **Streamlit web app** for viewing predictions
+## 🚀 Features
+- **Interactive Web App** built with Streamlit.  
+- **Predict Lending Rate** by adjusting regional & economic input features.  
+- **Top 5 Important Features** shown in a simple bar chart for interpretability.  
+- Model built using **Ridge Regression** with **RFE (Recursive Feature Elimination)** for feature selection.  
+- **User-friendly UI** with sidebar inputs and styled prediction output.  
 
 ---
 
-## 🖥 Try It Now
+## 🏦 App Preview
 
-- Visit the **live app**: [ML4BankGrowth Demo](https://ml4bankgrowth-5tsd4vzenky6bdpjcberfx.streamlit.app/)  
-- Input values for the relevant features → Get instant lending rate predictions  
-- The deployed app is **view-only**; source code, dataset, and models are not downloadable
+### Main Interface  
+- Sidebar inputs for all available features  
+- Green success box showing prediction result  
+- Bar chart of **Top 5 feature importances**  
 
----
-
-
----
-
-## 🧠 Technical Highlights
-
-- **Algorithm:** Random Forest Regressor
-- **Feature Selection:** Recursive Feature Elimination (RFE)
-- **Target Variable:** Lending Rate
-- **Evaluation Metrics:** R² Score, Mean Squared Error
-- **Deployment:** Streamlit for live demo, Flask API for programmatic access
+*(You can add screenshots here after running the app, e.g., from Streamlit Community Cloud.)*
 
 ---
 
-## 📜 License & Usage Restrictions
+## ⚙️ Installation & Setup  
 
-**© 2025 Humble Librarian — All Rights Reserved**  
-This project is **NOT open source**. You may **NOT** copy, reproduce, distribute, modify, or use any part of this repository without **prior written permission** from the author.  
-Violators will face legal action under applicable intellectual property laws.
+Clone the repository:  
+```bash
+git clone https://github.com/Humble-Librarian/ML4BankGrowth.git
+cd ML4BankGrowth
 
----
+```
+### Create a virtual environment & install dependencies
+```bash
+pip install -r requirements.txt
 
-## 📬 Contact
+```
+### Run the Streamlit app locally
+```bash
+streamlit run app.py
 
-For licensing or permission requests:  
-- **GitHub:** [Humble-Librarian](https://github.com/Humble-Librarian)  
-- **Live Demo:** [ML4BankGrowth](https://ml4bankgrowth-5tsd4vzenky6bdpjcberfx.streamlit.app/)
+```
+## 📂 Repository Structure
+ML4BankGrowth/
+│── app.py # Streamlit web app
+│── model.pkl # Trained Ridge Regression model
+│── rfe_selector.pkl # Feature selector (RFE)
+│── requirements.txt # Python dependencies
+│── README.md # Project documentation
