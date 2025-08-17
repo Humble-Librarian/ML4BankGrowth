@@ -162,6 +162,4 @@ st.markdown("""
 - **Features**: 40 input features covering geography, loan types, repo rate, GDP growth, etc.  
 - **Deployment**: Built with Streamlit for interactive exploration.  
 
-👉 This app is designed as a **portfolio project** to showcase end-to-end ML development: 
-data preprocessing, model training, evaluation, and deployment.
 """)
